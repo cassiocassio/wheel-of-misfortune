@@ -5,8 +5,8 @@ Completed jobs stack into a pile per person — **equal-height piles mean an equ
 the work.** Engineered so nobody gets stuck with the same job two weeks running, and the
 grim jobs get spread evenly rather than dumped on one person.
 
-> Runs on a Mac at home, reached from any phone or iPad on the Wi-Fi at
-> `http://misfortune.local:8000`. Nothing leaves your house.
+> Runs on a Mac or Linux box at home, reached from any phone or tablet on the Wi-Fi at
+> `http://<server-ip>:8000` (or `misfortune.local` on Apple/Windows). Nothing leaves your house.
 
 ## How it's fair
 
@@ -30,14 +30,16 @@ Add a chore by copying a line, remove one by deleting it, pause one with `in_pla
 Friendly tokens throughout (`effort: M`, `ick: 2`) — no maths, no JSON. Full instructions
 are in the file's comments.
 
-## Run it (Mac)
+## Run it
+
+Same steps on **macOS and Linux** — the app is OS-neutral; only the keep-it-running layer differs.
 
 With `make`:
 
 ```bash
 make install                          # venv + dependencies
 cp family.example.yaml family.yaml    # edit to taste
-make run                              # serve on the LAN (port 8000), Mac kept awake
+make run                              # serve on the LAN, port 8000
 ```
 
 Or by hand:
@@ -45,13 +47,22 @@ Or by hand:
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp family.example.yaml family.yaml          # edit to taste
-caffeinate -dimsu .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1
+cp family.example.yaml family.yaml
+.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1
 ```
 
-Then on each phone/iPad: open `http://misfortune.local:8000` in Safari → Share → Add to
-Home Screen. For always-on + auto-start, see `deploy/runbook.md` (launchd + anti-sleep),
-or just `make deploy`. Run `make help` to see every task.
+**Open it on a phone/tablet.** The address that works on *every* device is the host's IP —
+`http://<server-ip>:8000`. Give the box a fixed IP in your router, then bookmark it / Add to
+Home Screen. The friendly `http://misfortune.local:8000` also works on Apple devices (built-in)
+and Windows 10/11; on Linux it needs Avahi; **Android usually can't resolve `.local` — use the IP**.
+
+### Keep it running (optional)
+
+`make deploy` installs a background service that starts at login/boot and restarts on crash —
+`install.sh` auto-detects the OS (a **launchd** agent on macOS, a **systemd `--user`** unit on
+Linux; see `deploy/runbook.md`). It serves while the host is awake and sleeps with it — no forced
+wakefulness. For always-on, use a low-power box (e.g. a Raspberry Pi), or a `pmset repeat` wake
+window on a Mac. `make help` lists every task.
 
 > ⚠️ Run with **one worker only** (`--workers 1`). The app keeps a single shared ledger;
 > more workers would each keep their own and break fairness.
