@@ -20,7 +20,8 @@ the heart — get it right and unit-tested before touching the server or UI.
 
 ## As-built delta (spec trued to reality — 2026-06-01)
 
-This brief was followed closely; the sections below have been updated to match what shipped.
+This brief was followed closely; the sections below have been updated to match what shipped
+(**v0.1.0** — a complete first cut, green in tests but not yet user-tested; pre-1.0).
 The key differences between the original spec and the built app:
 
 - **New endpoint `POST /api/claim`** (§6, §7): take a *specific* on-wheel chore without

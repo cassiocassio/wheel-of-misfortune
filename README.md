@@ -69,8 +69,11 @@ window on a Mac. `make help` lists every task.
 
 ## Status
 
-**Built and green.** Engine, API, PWA client and deploy tooling are all in place and the
-test suite (`make test`) passes. The Phase-1 design decisions are resolved (`OPEN_QUESTIONS.md`).
+**v0.1.0 — built and green, but unproven.** Engine, API, PWA client and deploy tooling are
+all in place and the test suite (`make test`) passes; the Phase-1 design decisions are
+resolved (`OPEN_QUESTIONS.md`). It has had **no real-user testing yet** (only dev-browser
+checks) — hence the pre-1.0 version. It graduates to 1.0.0 once a household has actually
+lived with it for a week or two.
 
 - ✅ `app/` — FastAPI engine, seed + atomic state store, week maths, the §6 API
 - ✅ `web/` — the PWA client (wheel, piles, dashboard, daily button, offline shell)

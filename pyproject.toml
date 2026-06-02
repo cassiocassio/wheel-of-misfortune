@@ -4,7 +4,7 @@
 
 [project]
 name = "wheel-of-misfortune"
-version = "1.0.0"
+version = "0.1.0"
 description = "A fair, fun, LAN-only family chore-assignment PWA — spin, accept, suffer, fairly."
 readme = "README.md"
 license = {text = "AGPL-3.0-or-later"}
