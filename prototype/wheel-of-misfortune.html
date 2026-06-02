@@ -1,0 +1,432 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Wheel of Misfortune</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap');
+
+  :root{
+    --bg:#171022; --bg2:#1f1430; --ink:#f4ecff; --muted:#b6a6cf;
+    --gold:#E8B84B; --gold-dim:#9b8233;
+    --line:#3a2a52;
+    --surfaces:#E0A100; --floors:#1F8A8A; --laundry:#3D6FD6; --waste:#C2410C; --wet:#A01A58;
+    --p0:#7d8fa6; --p1:#9bb072; --p2:#a98aae; /* brightened player tints for dark bg */
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%}
+  body{
+    background:
+      radial-gradient(120% 80% at 50% -10%, #2a1a40 0%, var(--bg) 55%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Hanken Grotesk',system-ui,sans-serif;
+    overflow-x:hidden;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:22px 18px 60px;min-height:100%}
+  .num{font-family:'JetBrains Mono',monospace}
+
+  /* fairground bunting / glow header */
+  .brand{text-align:center;margin:6px 0 18px}
+  .brand h1{
+    font-family:'Fraunces',serif;font-weight:600;font-style:italic;
+    font-size:clamp(30px,8vw,46px);line-height:.95;margin:0;letter-spacing:.5px;
+    color:var(--gold);text-shadow:0 2px 0 var(--gold-dim),0 0 28px rgba(232,184,75,.25);
+  }
+  .brand p{margin:6px 0 0;color:var(--muted);font-size:13px;letter-spacing:.16em;text-transform:uppercase}
+
+  .screen{display:none;animation:fade .4s ease both}
+  .screen.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  /* ---------- Netflix-style picker ---------- */
+  .pick-q{text-align:center;font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin:24px 0 26px}
+  .profiles{display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
+  .profile{background:none;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:12px;width:120px}
+  .avatar{
+    width:104px;height:104px;border-radius:18px;display:grid;place-items:center;
+    font-family:'Fraunces',serif;font-size:44px;font-weight:600;color:#13101a;
+    border:3px solid transparent;transition:transform .18s,border-color .18s,box-shadow .18s;
+    box-shadow:0 10px 28px rgba(0,0,0,.4);
+  }
+  .profile:hover .avatar,.profile:focus-visible .avatar{transform:scale(1.07);border-color:var(--ink);box-shadow:0 14px 34px rgba(0,0,0,.55)}
+  .profile .pname{font-size:17px;color:var(--muted);font-weight:600}
+  .profile:hover .pname{color:var(--ink)}
+
+  /* ---------- spin screen ---------- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .back{background:none;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:7px 14px;font-size:13px;cursor:pointer;font-family:inherit}
+  .back:hover{color:var(--ink);border-color:var(--muted)}
+  .whoami{display:flex;align-items:center;gap:9px;font-weight:700}
+  .whoami .dot{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;color:#13101a;font-family:'Fraunces',serif;font-weight:700;font-size:15px}
+
+  .stage{position:relative;display:grid;place-items:center;margin:10px 0 4px}
+  .pointer{position:absolute;top:-2px;left:50%;transform:translateX(-50%);z-index:5;
+    width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:22px solid var(--gold);
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+  canvas#wheel{touch-action:none;cursor:grab;border-radius:50%;
+    box-shadow:0 0 0 8px #241636,0 0 0 11px var(--gold-dim),0 18px 50px rgba(0,0,0,.55)}
+  canvas#wheel:active{cursor:grabbing}
+  .hub{position:absolute;width:54px;height:54px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fff3cf,var(--gold) 60%,var(--gold-dim));
+    z-index:4;box-shadow:0 3px 8px rgba(0,0,0,.5);display:grid;place-items:center;font-size:22px}
+  .hint{text-align:center;color:var(--muted);font-size:13px;margin:12px 0 0;height:18px;letter-spacing:.04em}
+
+  /* task card */
+  .card{background:linear-gradient(180deg,var(--bg2),#190f29);border:1px solid var(--line);border-radius:18px;
+    padding:18px;margin:16px 0 6px;text-align:center;display:none;animation:pop .35s cubic-bezier(.2,1.3,.4,1) both}
+  .card.on{display:block}
+  @keyframes pop{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+  .kindtag{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+    padding:5px 11px;border-radius:999px;color:#120e1a}
+  .card h2{font-family:'Fraunces',serif;font-size:25px;margin:13px 0 4px;font-weight:600}
+  .card .room{color:var(--muted);font-size:14px}
+  .meta{display:flex;gap:18px;justify-content:center;margin:14px 0 4px;font-size:13px;color:var(--muted)}
+  .meta b{color:var(--ink);font-family:'JetBrains Mono',monospace}
+  .pips{display:inline-flex;gap:3px;vertical-align:middle;margin-left:5px}
+  .pip{width:8px;height:8px;border-radius:50%;background:#43314f}
+  .pip.on{background:var(--wet)}
+  .actions{display:flex;gap:10px;margin-top:16px}
+  .btn{flex:1;border:0;border-radius:13px;padding:14px;font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:16px;cursor:pointer}
+  .btn-accept{background:var(--gold);color:#1a1206}
+  .btn-accept:hover{filter:brightness(1.07)}
+  .btn-reroll{background:transparent;color:var(--muted);border:1px solid var(--line)}
+  .btn-reroll:hover{color:var(--ink);border-color:var(--muted)}
+  .btn-done{background:#36b36b;color:#06210f}
+  .btn-done:hover{filter:brightness(1.08)}
+  .doing{color:var(--gold);font-size:13px;letter-spacing:.04em;margin-bottom:10px}
+
+  /* ---------- piles ---------- */
+  .piles-h{display:flex;align-items:baseline;justify-content:space-between;margin:30px 4px 10px}
+  .piles-h h3{font-family:'Fraunces',serif;font-weight:600;font-size:19px;margin:0}
+  .piles-h span{color:var(--muted);font-size:12px}
+  .piles{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+    align-items:end;min-height:230px;padding:0 2px;
+    border-bottom:2px solid var(--line)}
+  .col{display:flex;flex-direction:column-reverse;align-items:stretch;gap:3px;position:relative}
+  .tile{border-radius:6px;display:flex;align-items:center;justify-content:center;
+    color:#100c17;font-size:10.5px;font-weight:700;overflow:hidden;white-space:nowrap;
+    padding:0 6px;animation:drop .45s cubic-bezier(.25,1.2,.4,1) both;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 1px 2px rgba(0,0,0,.3)}
+  @keyframes drop{from{opacity:0;transform:translateY(-30px) scaleY(.4)}to{opacity:1;transform:none}}
+  .fairline{position:absolute;left:0;right:0;border-top:2px dashed var(--gold);opacity:.6;z-index:3;pointer-events:none;transition:bottom .5s ease}
+  .fairline::after{content:"fair share";position:absolute;right:0;top:-16px;font-size:10px;color:var(--gold);letter-spacing:.08em}
+  .foot{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:9px}
+  .foot .pf{text-align:center}
+  .foot .pf .nm{font-weight:700;font-size:14px}
+  .foot .pf .tot{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted)}
+  .foot .pf .tot b{color:var(--gold)}
+  .colbase{height:6px;border-radius:3px;margin-top:4px;opacity:.9}
+
+  #fx{position:fixed;inset:0;pointer-events:none;z-index:99}
+</style>
+
+<div class="wrap">
+  <div class="brand">
+    <h1>Wheel of Misfortune</h1>
+    <p>spin &middot; accept &middot; suffer &middot; fairly</p>
+  </div>
+
+  <!-- PICKER -->
+  <section id="screen-pick" class="screen on">
+    <div class="pick-q">Who&rsquo;s doing chores?</div>
+    <div class="profiles" id="profiles"></div>
+  </section>
+
+  <!-- SPIN -->
+  <section id="screen-spin" class="screen">
+    <div class="topbar">
+      <button class="back" id="back">&larr; Switch</button>
+      <div class="whoami"><span class="dot" id="whoDot"></span><span id="whoName"></span></div>
+    </div>
+
+    <div class="stage">
+      <div class="pointer"></div>
+      <canvas id="wheel" width="320" height="320"></canvas>
+      <div class="hub">🎡</div>
+    </div>
+    <p class="hint" id="hint">Flick the wheel</p>
+
+    <div class="card" id="card">
+      <span class="kindtag" id="kindtag"></span>
+      <h2 id="taskName"></h2>
+      <div class="room" id="taskRoom"></div>
+      <div class="meta">
+        <span>effort <b id="taskEffort"></b></span>
+        <span>grimness <span class="pips" id="taskPips"></span></span>
+      </div>
+      <div id="acceptRow" class="actions">
+        <button class="btn btn-reroll" id="reroll">Reroll (<span id="rr">1</span>)</button>
+        <button class="btn btn-accept" id="accept">I accept</button>
+      </div>
+      <div id="doneRow" style="display:none">
+        <div class="doing">It&rsquo;s yours. Go forth.</div>
+        <button class="btn btn-done" id="done" style="width:100%">I&rsquo;m done ✓</button>
+      </div>
+    </div>
+
+    <div class="piles-h">
+      <h3>The Pile</h3><span>height = effort done &middot; equal piles = a fair week</span>
+    </div>
+    <div class="piles" id="piles">
+      <div class="fairline" id="fairline" style="bottom:0"></div>
+    </div>
+    <div class="foot" id="foot"></div>
+  </section>
+</div>
+
+<canvas id="fx"></canvas>
+
+<script>
+const EFFORT = {XS:2, S:3, M:4, L:5};            // compressed scale, hardest = 2.5x easiest
+const PXPER  = 13;                                // pixels of pile height per effort point
+const KINDS = {
+  surfaces:{label:"Surfaces",  colour:"#E0A100"},
+  floors:  {label:"Floors",    colour:"#1F8A8A"},
+  laundry: {label:"Laundry",   colour:"#3D6FD6"},
+  waste:   {label:"Waste",     colour:"#C2410C"},
+  wet:     {label:"Wet",       colour:"#A01A58"},
+};
+const PLAYERS = [
+  {name:"Martin", tint:"var(--p0)", hex:"#7d8fa6", init:"M"},
+  {name:"Sarah",  tint:"var(--p1)", hex:"#9bb072", init:"S"},
+  {name:"Alice",  tint:"var(--p2)", hex:"#a98aae", init:"A"},
+];
+// weekly in-play subset, from family.example.yaml
+const TASKS = [
+  {room:"Lounge",kind:"surfaces",name:"Vacuum sofa",effort:"S",ick:0},
+  {room:"Lounge",kind:"floors",name:"Sweep / hoover floor",effort:"S",ick:0},
+  {room:"Lounge",kind:"floors",name:"Mop floor",effort:"M",ick:1},
+  {room:"Lounge",kind:"surfaces",name:"Dust & wipe stairs",effort:"M",ick:0},
+  {room:"Lounge",kind:"surfaces",name:"Dust & wipe bannisters",effort:"S",ick:0},
+  {room:"Bedrooms",kind:"laundry",name:"Laundry to machine",effort:"XS",ick:0},
+  {room:"Bedrooms",kind:"floors",name:"Sweep / vacuum",effort:"S",ick:0},
+  {room:"Bedrooms",kind:"floors",name:"Mop",effort:"M",ick:1},
+  {room:"Bedrooms",kind:"surfaces",name:"Dust & wipe surfaces",effort:"S",ick:0},
+  {room:"Laundry",kind:"laundry",name:"Wash towels (60°)",effort:"XS",ick:0},
+  {room:"Laundry",kind:"laundry",name:"Wash & hang (30°)",effort:"M",ick:0},
+  {room:"Laundry",kind:"laundry",name:"Fold & put away",effort:"M",ick:1},
+  {room:"Kitchen",kind:"surfaces",name:"Wipe table & counters",effort:"S",ick:0},
+  {room:"Kitchen",kind:"surfaces",name:"Load / unload dishwasher",effort:"S",ick:1},
+  {room:"Kitchen",kind:"floors",name:"Sweep floor",effort:"S",ick:0},
+  {room:"Kitchen",kind:"floors",name:"Mop floor",effort:"M",ick:1},
+  {room:"Kitchen",kind:"surfaces",name:"Wipe outside cupboards",effort:"S",ick:0},
+  {room:"Kitchen",kind:"waste",name:"Empty rubbish bins",effort:"S",ick:3},
+  {room:"Bathroom",kind:"wet",name:"Clean sink & counter",effort:"S",ick:1},
+  {room:"Bathroom",kind:"wet",name:"Wipe cistern & ledge",effort:"S",ick:2},
+  {room:"Bathroom",kind:"wet",name:"Clean floor",effort:"M",ick:2},
+  {room:"Bathroom",kind:"wet",name:"Clean toilet",effort:"M",ick:3},
+  {room:"Bathroom",kind:"waste",name:"Empty bin",effort:"XS",ick:2},
+];
+TASKS.forEach((t,i)=>t.id=i);
+
+// ---- state ----
+const state = {
+  player:null,
+  done:new Set(),                                // task ids completed this session
+  byPlayer:{},                                   // name -> [{task}]
+  effort:{}, ick:{},                             // totals per player
+  lastBy:{},                                     // taskId -> player who last did it
+  rerolls:1, candidates:[], chosen:null,
+};
+PLAYERS.forEach(p=>{state.byPlayer[p.name]=[];state.effort[p.name]=0;state.ick[p.name]=0});
+
+// ---- picker ----
+const profiles = document.getElementById('profiles');
+PLAYERS.forEach(p=>{
+  const b=document.createElement('button');b.className='profile';
+  b.innerHTML=`<div class="avatar" style="background:${p.tint}">${p.init}</div><div class="pname">${p.name}</div>`;
+  b.onclick=()=>startTurn(p);
+  profiles.appendChild(b);
+});
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on')}
+document.getElementById('back').onclick=()=>{resetCard();show('screen-pick')};
+
+function startTurn(p){
+  state.player=p;
+  document.getElementById('whoName').textContent=p.name;
+  const dot=document.getElementById('whoDot');dot.textContent=p.init;dot.style.background=p.tint;
+  resetCard();
+  buildCandidates();
+  drawWheel(0);
+  document.getElementById('hint').textContent = remaining().length? 'Flick the wheel' : 'All done this week 🎉';
+  renderPiles();
+  show('screen-spin');
+}
+
+// ---- selection logic (prototype of the server engine) ----
+function remaining(){return TASKS.filter(t=>!state.done.has(t.id))}
+function avgIck(){const v=Object.values(state.ick);return v.reduce((a,b)=>a+b,0)/v.length}
+
+function weightFor(t,p){
+  let w=1;
+  if(state.lastBy[t.id]===p.name) w*=0.08;          // cooldown: just did it
+  if(t.ick>0){                                      // ick = spread, not reward
+    const excess=Math.max(0,state.ick[p.name]-avgIck());
+    w*= 1/(1+excess*0.6);                            // grim jobs dodge the already-grim-laden
+  }
+  return w;
+}
+function buildCandidates(){
+  const pool=remaining().map(t=>({t,w:weightFor(t,state.player)}));
+  pool.sort((a,b)=>b.w-a.w);
+  state.candidates=pool.slice(0,8).map(x=>x.t);      // wheel shows up to 8
+}
+function pickWinner(){
+  const ws=state.candidates.map(t=>weightFor(t,state.player));
+  const tot=ws.reduce((a,b)=>a+b,0);
+  let r=Math.random()*tot;
+  for(let i=0;i<ws.length;i++){r-=ws[i];if(r<=0)return i}
+  return ws.length-1;
+}
+
+// ---- wheel drawing + flick ----
+const cv=document.getElementById('wheel'),cx=cv.getContext('2d');
+const DPR=Math.min(2,window.devicePixelRatio||1);
+function sizeWheel(){const s=Math.min(330,window.innerWidth-60);cv.style.width=s+'px';cv.style.height=s+'px';cv.width=s*DPR;cv.height=s*DPR}
+sizeWheel();
+let angle=0;
+function drawWheel(a){
+  angle=a; const n=state.candidates.length||1;
+  const W=cv.width,R=W/2;cx.clearRect(0,0,W,W);
+  cx.save();cx.translate(R,R);cx.rotate(a);
+  const step=2*Math.PI/n;
+  for(let i=0;i<n;i++){
+    const t=state.candidates[i];
+    cx.beginPath();cx.moveTo(0,0);cx.arc(0,0,R-2,i*step,(i+1)*step);cx.closePath();
+    cx.fillStyle=t?KINDS[t.kind].colour:'#333';cx.fill();
+    cx.strokeStyle='rgba(0,0,0,.25)';cx.lineWidth=2;cx.stroke();
+    // label
+    if(t){
+      cx.save();cx.rotate(i*step+step/2);cx.textAlign='right';
+      cx.fillStyle='rgba(15,12,20,.92)';cx.font=`700 ${Math.max(9,R*0.058)}px 'Hanken Grotesk',sans-serif`;
+      const label=t.name.length>20?t.name.slice(0,19)+'…':t.name;
+      cx.fillText(label,R-16,4);cx.restore();
+    }
+  }
+  cx.restore();
+}
+function targetAngleFor(idx){
+  const n=state.candidates.length,step=2*Math.PI/n;
+  // sector idx centre must land under pointer (top = -90deg = -PI/2)
+  const centre=idx*step+step/2;
+  return (-Math.PI/2 - centre);
+}
+let spinning=false;
+function spin(power){
+  if(spinning||!remaining().length)return;
+  spinning=true;resetCard();document.getElementById('hint').textContent='…';
+  buildCandidates();drawWheel(angle);
+  const idx=pickWinner();
+  const turns=4+Math.min(4,power*3)+Math.random();          // power only buys drama
+  const base=targetAngleFor(idx);
+  const start=angle, end=base+turns*2*Math.PI;
+  const dur=2600+power*900, t0=performance.now();
+  (function frame(now){
+    const k=Math.min(1,(now-t0)/dur);
+    const e=1-Math.pow(1-k,3);                                // ease-out cubic
+    drawWheel(start+(end-start)*e);
+    if(k<1)requestAnimationFrame(frame);
+    else{spinning=false;showCard(state.candidates[idx])}
+  })(t0);
+}
+
+// flick / drag
+let down=null;
+cv.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY,t:performance.now()}});
+cv.addEventListener('pointerup',e=>{
+  if(!down)return;
+  const dx=e.clientX-down.x,dy=e.clientY-down.y;
+  const dist=Math.hypot(dx,dy),dt=performance.now()-down.t;
+  const power=Math.max(0,Math.min(1,(dist/dt)*2.2));          // flick speed -> drama
+  down=null;spin(power||0.2);
+});
+cv.addEventListener('click',()=>{if(!spinning&&!down)spin(0.4)});
+
+// ---- task card ----
+const card=document.getElementById('card');
+function resetCard(){card.classList.remove('on');document.getElementById('acceptRow').style.display='flex';document.getElementById('doneRow').style.display='none'}
+function showCard(t){
+  state.chosen=t;state.rerolls=1;document.getElementById('rr').textContent=state.rerolls;
+  const k=KINDS[t.kind];
+  const tag=document.getElementById('kindtag');tag.textContent=k.label;tag.style.background=k.colour;
+  document.getElementById('taskName').textContent=t.name;
+  document.getElementById('taskRoom').textContent=t.room;
+  document.getElementById('taskEffort').textContent=EFFORT[t.effort];
+  const pips=document.getElementById('taskPips');pips.innerHTML='';
+  for(let i=0;i<3;i++){const d=document.createElement('span');d.className='pip'+(i<t.ick?' on':'');pips.appendChild(d)}
+  document.getElementById('acceptRow').style.display='flex';
+  document.getElementById('doneRow').style.display='none';
+  document.getElementById('hint').textContent='';
+  card.classList.add('on');
+}
+document.getElementById('reroll').onclick=()=>{
+  if(state.rerolls<=0)return;state.rerolls--;document.getElementById('rr').textContent=state.rerolls;
+  spin(0.5);
+};
+document.getElementById('accept').onclick=()=>{
+  document.getElementById('acceptRow').style.display='none';
+  document.getElementById('doneRow').style.display='block';
+};
+document.getElementById('done').onclick=()=>{
+  const t=state.chosen,p=state.player;
+  state.done.add(t.id);state.lastBy[t.id]=p.name;
+  state.byPlayer[p.name].push(t);
+  state.effort[p.name]+=EFFORT[t.effort];
+  state.ick[p.name]+=t.ick;
+  burst(KINDS[t.kind].colour,p.hex);
+  resetCard();renderPiles();
+  buildCandidates();drawWheel(angle);
+  document.getElementById('hint').textContent=remaining().length?'Flick again':'All done this week 🎉';
+};
+
+// ---- piles ----
+function renderPiles(){
+  const piles=document.getElementById('piles'),foot=document.getElementById('foot');
+  // remove old columns (keep fairline)
+  [...piles.querySelectorAll('.col')].forEach(c=>c.remove());
+  foot.innerHTML='';
+  PLAYERS.forEach(p=>{
+    const col=document.createElement('div');col.className='col';
+    state.byPlayer[p.name].forEach(t=>{
+      const tile=document.createElement('div');tile.className='tile';
+      tile.style.height=(EFFORT[t.effort]*PXPER)+'px';
+      tile.style.background=KINDS[t.kind].colour;
+      tile.textContent=EFFORT[t.effort]>=4?t.name:'';
+      tile.title=`${t.name} · effort ${EFFORT[t.effort]}`;
+      col.appendChild(tile);
+    });
+    const base=document.createElement('div');base.className='colbase';base.style.background=p.tint;col.appendChild(base);
+    piles.appendChild(col);
+    const pf=document.createElement('div');pf.className='pf';
+    pf.innerHTML=`<div class="nm" style="color:${p.tint}">${p.name}</div>
+      <div class="tot"><b>${state.effort[p.name]}</b> effort · ${state.byPlayer[p.name].length} jobs</div>`;
+    foot.appendChild(pf);
+  });
+  // fair-share line at the average effort height
+  const avg=Object.values(state.effort).reduce((a,b)=>a+b,0)/PLAYERS.length;
+  document.getElementById('fairline').style.bottom=(avg*PXPER+6)+'px';
+}
+renderPiles();
+
+// ---- confetti ----
+const fx=document.getElementById('fx'),fc=fx.getContext('2d');
+function rs(){fx.width=innerWidth;fx.height=innerHeight}rs();addEventListener('resize',()=>{rs();sizeWheel();drawWheel(angle)});
+let parts=[];
+function burst(c1,c2){
+  const cols=[c1,c2,'#E8B84B','#f4ecff'];
+  for(let i=0;i<90;i++)parts.push({
+    x:innerWidth/2,y:innerHeight*0.42,
+    vx:(Math.random()-.5)*11,vy:Math.random()*-13-4,
+    g:0.34,s:5+Math.random()*6,c:cols[i%cols.length],a:1,r:Math.random()*6,vr:(Math.random()-.5)*.4
+  });
+  if(parts.length<=90)tick();
+}
+function tick(){
+  fc.clearRect(0,0,fx.width,fx.height);
+  parts.forEach(p=>{p.vy+=p.g;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;p.a-=0.012;
+    fc.save();fc.globalAlpha=Math.max(0,p.a);fc.translate(p.x,p.y);fc.rotate(p.r);
+    fc.fillStyle=p.c;fc.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6);fc.restore();});
+  parts=parts.filter(p=>p.a>0&&p.y<fx.height+40);
+  if(parts.length)requestAnimationFrame(tick);else fc.clearRect(0,0,fx.width,fx.height);
+}
+</script>

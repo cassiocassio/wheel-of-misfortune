@@ -1,0 +1,32 @@
+# Project metadata + tooling config in one place (modern Python layout).
+# Runtime install still follows SPEC §10: `pip install -r requirements.txt`.
+# This file additionally declares dev tooling and centralises pytest/ruff config.
+
+[project]
+name = "wheel-of-misfortune"
+version = "1.0.0"
+description = "A fair, fun, LAN-only family chore-assignment PWA — spin, accept, suffer, fairly."
+readme = "README.md"
+license = {text = "AGPL-3.0-or-later"}
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pyyaml",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+# pycodestyle, pyflakes, import-sort, pyupgrade, bugbear — a sane, quiet default.
+select = ["E", "F", "I", "UP", "B"]

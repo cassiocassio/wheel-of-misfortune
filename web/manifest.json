@@ -1,0 +1,16 @@
+{
+  "name": "Wheel of Misfortune",
+  "short_name": "Misfortune",
+  "description": "Spin, accept, suffer — fairly. The family chore wheel.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#171022",
+  "theme_color": "#171022",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

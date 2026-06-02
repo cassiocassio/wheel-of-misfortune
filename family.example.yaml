@@ -1,0 +1,133 @@
+# =============================================================================
+#  WHEEL OF MISFORTUNE  —  your household, your chores
+# =============================================================================
+#
+#  This is the ONE file you edit to make the app your own.
+#
+#  HOW TO USE IT
+#    1. Copy this file and rename the copy to:  family.yaml
+#    2. Edit family.yaml to match your home (see the rules below).
+#    3. Start the app. It reads this file ONCE to set things up.
+#       After that it keeps its own record of who-did-what in a separate
+#       file (state.json) — you never edit that one by hand.
+#    4. Changed your mind later? Edit family.yaml and re-seed (see the README).
+#
+#  THE FIVE RULES OF EDITING
+#    • To ADD a chore:    copy a whole line, paste it, change the words.
+#    • To REMOVE a chore: delete its line.
+#    • To PAUSE a chore:  add  in_play: false  (good for monthly/seasonal jobs).
+#    • Keep the punctuation: the  - { }  and the commas matter.
+#    • If any text contains a : or a , wrap it in "quotes".
+#
+#  Lines starting with #  are notes to you. The app ignores them.
+# =============================================================================
+
+
+# ----- WHO LIVES HERE --------------------------------------------------------
+# Add or remove people freely. 'tint' is just their colour on the dashboard —
+# pick anything, or delete the tint line and the app will choose one.
+players:
+  - { name: "Martin", tint: "#5B6B7A" }
+  - { name: "Sarah",  tint: "#7A8B5E" }
+  - { name: "Alice",  tint: "#8A6F8E" }
+
+
+# ----- HOW HARD / HOW HORRIBLE  (read this once, then forget it) -------------
+# Every chore gets two scores. You only ever type the friendly word/number.
+#
+#   effort  — how much time & sweat:
+#       XS = under 2 min        (empty a bin)
+#       S  = a few minutes      (wipe a surface, sweep one room)
+#       M  = 10–20 min          (mop, vacuum, clean the loo properly)
+#       L  = a big job          (clean the fridge, empty the cupboards)
+#
+#   ick     — how unpleasant, 0 to 3:
+#       0 = fine        1 = a bit grim      2 = grim       3 = truly grim
+#
+# The app keeps these two SEPARATE. Effort is the "currency": it's shared out
+# evenly between everyone and it's what builds your pile. Ick (grimness) is never
+# added to effort and never scored — the wheel simply stops sending grim jobs your
+# way once you've done your fair share of them. You don't do any maths.
+
+
+# ----- KINDS OF CHORE  (the colours on the wheel) ---------------------------
+# Each chore belongs to one 'kind'. Kinds group jobs that use the same kit or
+# get done together. Colours/icons are optional — delete them for defaults.
+# Add your own kinds here if your home needs them (e.g. 'garden', 'pets').
+kinds:
+  surfaces: { label: "Surfaces & dishes", colour: "#E0A100", icon: "sparkle" }
+  floors:   { label: "Floors",            colour: "#1F8A8A", icon: "broom"   }
+  laundry:  { label: "Laundry",           colour: "#3D6FD6", icon: "shirt"   }
+  waste:    { label: "Waste",             colour: "#C2410C", icon: "trash"   }
+  wet:      { label: "Wet & sanitise",    colour: "#A01A58", icon: "spray"   }
+
+
+# ----- THE CHORES  (this is the bit you'll change most) ----------------------
+# One line per chore. Fields:
+#   room    – where it is (also used to group things; name it anything)
+#   kind    – one of the kinds above
+#   freq    – how often (daily / weekly / fortnightly / monthly / quarterly).
+#             This also decides WHERE a chore appears: 'daily' and '2-3 weekly'
+#             chores go on the quick DAILY BONUS BUTTON (a tap + a happy noise);
+#             everything weekly-or-deeper goes on the WHEEL.
+#   effort  – XS / S / M / L
+#   ick     – 0 / 1 / 2 / 3
+#   in_play – leave it out to mean "yes, include it". Add  in_play: false  to pause.
+#
+# Tip: jobs done less than weekly (monthly, quarterly) are paused by default
+# below — switch them on in the week you actually do them.
+#
+# Advanced (optional): you can add  id: some_short_name  to a chore. The app
+# uses it to remember the chore's history even if you rename it. If you leave
+# it out, the app makes one from the name — fine for most people.
+
+chores:
+
+  # --- Lounge ---------------------------------------------------------------
+  - { room: "Lounge",   kind: surfaces, name: "Vacuum sofa",                       freq: weekly,     effort: S,  ick: 0 }
+  - { room: "Lounge",   kind: surfaces, name: "Dust & wipe down shelving",         freq: monthly,    effort: S,  ick: 0, in_play: false }
+  - { room: "Lounge",   kind: floors,   name: "Sweep / hoover floor",              freq: weekly,     effort: S,  ick: 0 }
+  - { room: "Lounge",   kind: floors,   name: "Mop floor",                         freq: weekly,     effort: M,  ick: 1 }
+  - { room: "Lounge",   kind: surfaces, name: "Dust & wipe stairs",                freq: weekly,     effort: M,  ick: 0 }
+  - { room: "Lounge",   kind: surfaces, name: "Dust & wipe bannisters",            freq: weekly,     effort: S,  ick: 0 }
+  - { room: "Lounge",   kind: surfaces, name: "Dust & wipe bannister ledge",       freq: weekly,     effort: XS, ick: 0 }
+
+  # --- Bedrooms -------------------------------------------------------------
+  - { room: "Bedrooms", kind: laundry,  name: "Take laundry to washing machine",   freq: weekly,     effort: XS, ick: 0 }
+  - { room: "Bedrooms", kind: floors,   name: "Sweep / vacuum",                    freq: weekly,     effort: S,  ick: 0 }
+  - { room: "Bedrooms", kind: floors,   name: "Mop",                               freq: weekly,     effort: M,  ick: 1 }
+  - { room: "Bedrooms", kind: surfaces, name: "Dust & wipe surfaces",              freq: weekly,     effort: S,  ick: 0 }
+
+  # --- Laundry --------------------------------------------------------------
+  - { room: "Laundry",  kind: laundry,  name: "Wash towels & tea towels (60°)",    freq: weekly,     effort: XS, ick: 0 }
+  - { room: "Laundry",  kind: laundry,  name: "Change bedlinen",                   freq: fortnightly, effort: M, ick: 1 }
+  - { room: "Laundry",  kind: laundry,  name: "Wash & hang laundry (30°)",         freq: weekly,     effort: M,  ick: 0 }
+  - { room: "Laundry",  kind: laundry,  name: "Fold & put away laundry",           freq: weekly,     effort: M,  ick: 1 }
+
+  # --- Kitchen --------------------------------------------------------------
+  - { room: "Kitchen",  kind: surfaces, name: "Wipe table & counters",            freq: daily,      effort: S,  ick: 0 }
+  - { room: "Kitchen",  kind: surfaces, name: "Load / unload dishwasher",         freq: daily,      effort: S,  ick: 1 }
+  - { room: "Kitchen",  kind: floors,   name: "Sweep floor",                      freq: daily,      effort: S,  ick: 0 }
+  - { room: "Kitchen",  kind: floors,   name: "Mop floor",                        freq: weekly,     effort: M,  ick: 1 }
+  - { room: "Kitchen",  kind: surfaces, name: "Wipe down shelving",               freq: monthly,    effort: S,  ick: 0, in_play: false }
+  - { room: "Kitchen",  kind: wet,      name: "Clean fridge",                     freq: monthly,    effort: L,  ick: 2, in_play: false }
+  - { room: "Kitchen",  kind: surfaces, name: "Clean inside cupboards",           freq: quarterly,  effort: L,  ick: 1, in_play: false }
+  - { room: "Kitchen",  kind: surfaces, name: "Wipe outside of cupboards",        freq: weekly,     effort: S,  ick: 0 }
+  - { room: "Kitchen",  kind: waste,    name: "Empty rubbish bins",               freq: "2-3 weekly", effort: S, ick: 3 }
+
+  # --- Bathroom -------------------------------------------------------------
+  # Note: the bathroom floor is filed under 'wet', not 'floors', on purpose —
+  # it uses bathroom cloths/cleaners that you keep away from the kitchen.
+  - { room: "Bathroom", kind: wet,      name: "Clean sink & counter top",         freq: "2-3 weekly", effort: S, ick: 1 }
+  - { room: "Bathroom", kind: wet,      name: "Wipe cistern & ledge behind loo",  freq: "2-3 weekly", effort: S, ick: 2 }
+  - { room: "Bathroom", kind: wet,      name: "Clean floor",                      freq: "2-3 weekly", effort: M, ick: 2 }
+  - { room: "Bathroom", kind: wet,      name: "Disinfect, de-limescale & clean toilet", freq: weekly, effort: M, ick: 3 }
+  - { room: "Bathroom", kind: waste,    name: "Empty bin",                        freq: weekly,     effort: XS, ick: 2 }
+
+
+# ----- SETTINGS  (advanced — the defaults are good, ignore unless curious) ---
+settings:
+  week_start: monday        # which day the week resets on
+  rerolls_per_spin: 1       # how many times you can re-spin before a job is yours
+  cooldown_weeks: 3         # how long before the same job can land on you again
+  ick_sensitivity: 0.5      # higher = harder to be handed grim jobs two weeks running

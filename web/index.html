@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Misfortune">
+<meta name="theme-color" content="#171022">
+<title>Wheel of Misfortune</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/icon-180.png">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <h1>Wheel of Misfortune</h1>
+    <p>spin &middot; accept &middot; suffer &middot; fairly</p>
+    <button class="mute" id="mute" title="Sound on/off" aria-label="Sound on/off" aria-pressed="false">&#128266;</button>
+  </div>
+
+  <!-- PICKER -->
+  <section id="screen-pick" class="screen on">
+    <div class="pick-q">Who&rsquo;s doing chores?</div>
+    <div class="profiles" id="profiles"></div>
+  </section>
+
+  <!-- SPIN + DASHBOARD live behind the picker -->
+  <section id="screen-app" class="screen">
+    <div class="topbar">
+      <button class="back" id="back">&larr; Switch</button>
+      <div class="whoami"><span class="dot" id="whoDot"></span><span id="whoName"></span></div>
+    </div>
+    <div class="tabs" role="tablist" aria-label="View">
+      <button class="tab on" id="tab-spin" data-view="view-spin" role="tab" aria-selected="true" aria-controls="view-spin">Spin</button>
+      <button class="tab" id="tab-dash" data-view="view-dash" role="tab" aria-selected="false" aria-controls="view-dash">Dashboard</button>
+    </div>
+
+    <!-- SPIN VIEW -->
+    <div id="view-spin" class="view" role="tabpanel" aria-labelledby="tab-spin">
+      <div class="stage">
+        <div class="pointer"></div>
+        <canvas id="wheel" width="320" height="320"></canvas>
+        <div class="hub">&#127905;</div>
+      </div>
+      <p class="hint" id="hint" aria-live="polite">Flick the wheel</p>
+
+      <div class="card" id="card">
+        <span class="kindtag" id="kindtag"></span>
+        <h2 id="taskName"></h2>
+        <div class="room" id="taskRoom"></div>
+        <div class="meta">
+          <span>effort <span class="badge" id="taskEffort"></span></span>
+          <span>grimness <span class="pips" id="taskPips"></span></span>
+        </div>
+        <div id="acceptRow" class="actions">
+          <button class="btn btn-reroll" id="reroll">Reroll (<span id="rr">1</span>)</button>
+          <button class="btn btn-accept" id="accept">I accept</button>
+        </div>
+        <div id="doneRow" style="display:none">
+          <div class="doing">It&rsquo;s yours. Go forth.</div>
+          <button class="btn btn-done" id="done" style="width:100%">I&rsquo;m done &#10003;</button>
+        </div>
+      </div>
+
+      <div class="pill-row">
+        <button class="daily-pill" id="dailyBtn">
+          <span>&#43; Daily chore</span><span class="tally" id="dailyTally">0 today</span>
+        </button>
+        <button class="claim-pill" id="claimBtn">&#43; Weekly chore</button>
+      </div>
+
+      <div class="piles-h">
+        <h3>The Pile</h3><span>height = effort done &middot; equal piles = a fair week</span>
+      </div>
+      <div class="piles" id="piles"><div class="fairline" id="fairline" style="bottom:0"></div></div>
+      <div class="foot" id="foot"></div>
+    </div>
+
+    <!-- DASHBOARD VIEW -->
+    <div id="view-dash" class="view" style="display:none" role="tabpanel" aria-labelledby="tab-dash">
+      <div class="cards3" id="pcards"></div>
+      <div class="piles-h"><h3>The Pile</h3><span id="weekLabel"></span></div>
+      <div class="piles" id="dpiles"><div class="fairline" id="dfairline" style="bottom:0"></div></div>
+      <div class="foot" id="dfoot"></div>
+      <div class="gaps" id="gaps"><h3>When was it last done?</h3></div>
+    </div>
+  </section>
+</div>
+
+<!-- daily bottom sheet -->
+<div class="sheet-scrim" id="scrim"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-grip"></div>
+  <h3 id="sheetTitle">Daily chores</h3>
+  <p class="sub" id="sheetSub">One tap logs it &mdash; a happy noise, a weekly tally. Never on the wheel, never on the pile.</p>
+  <div class="daily-list" id="dailyList"></div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<canvas id="fx"></canvas>
+
+<script src="/app.js"></script>
+</body>
+</html>

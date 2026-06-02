@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- LaunchAgent for the Wheel of Misfortune server.
+     __WORKDIR__ is replaced with the repo's absolute path by deploy/install.sh.
+     RunAtLoad starts it at login; KeepAlive restarts it if it ever dies. The Mac
+     is deliberately NOT kept awake — the server runs while the Mac is awake and
+     sleeps with it. For always-on, run it on a low-power box (deploy/runbook.md §9),
+     or schedule a wake window with `pmset repeat`. -->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.storey.misfortune</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>__WORKDIR__/.venv/bin/uvicorn</string>
+        <string>app.main:app</string>
+        <string>--host</string>
+        <string>0.0.0.0</string>
+        <string>--port</string>
+        <string>8000</string>
+        <string>--workers</string>
+        <string>1</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>__WORKDIR__</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>__WORKDIR__/logs/misfortune.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>__WORKDIR__/logs/misfortune.err.log</string>
+
+    <key>ProcessType</key>
+    <string>Interactive</string>
+</dict>
+</plist>

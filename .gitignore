@@ -1,0 +1,22 @@
+# runtime state — the live ledger, never committed
+state.json
+state.json.bak
+*.snapshot.json
+
+# personal household config (copied from family.example.yaml)
+family.yaml
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+
+# logs
+*.log
+
+# os / editor
+.DS_Store
+.idea/
+.vscode/

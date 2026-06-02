@@ -1,0 +1,21 @@
+# systemd --user unit for the Wheel of Misfortune server (Linux).
+# __WORKDIR__ is replaced with the repo's absolute path by deploy/install.sh.
+# This is the Linux counterpart to deploy/com.storey.misfortune.plist (launchd):
+#   Restart=always           ≈ launchd KeepAlive (respawn if it dies)
+#   `loginctl enable-linger`  ≈ launchd RunAtLoad (start at boot, no login needed)
+# No caffeinate equivalent — a Linux box used as a server doesn't suspend by default;
+# if yours is a laptop, see the runbook (systemd-inhibit / disable suspend).
+[Unit]
+Description=Wheel of Misfortune — family chore wheel (LAN-only)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=__WORKDIR__
+ExecStart=__WORKDIR__/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=default.target
